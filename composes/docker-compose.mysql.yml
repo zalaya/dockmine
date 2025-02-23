@@ -1,0 +1,47 @@
+name: redmine
+
+services:
+
+  database:
+    image: mysql:latest
+    container_name: database
+    restart: unless-stopped
+    networks:
+      - redmine
+    volumes:
+      - database_data:/var/lib/mysql
+    ports:
+      - "3305:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: redmine
+      MYSQL_USER: redmine
+      MYSQL_PASSWORD: redmine
+
+  application:
+    image: redmine:latest
+    container_name: application
+    restart: unless-stopped
+    depends_on:
+      - database
+    networks:
+      - redmine
+    volumes:
+      - application_data:/usr/src/redmine/files
+    ports:
+      - "3005:3000"
+    environment:
+      REDMINE_DB_MYSQL: database
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine
+      REDMINE_SECRET_KEY_BASE: 1234
+
+volumes:
+  database_data:
+  application_data:
+
+networks:
+  redmine:
+    name: redmine
+    driver: bridge
